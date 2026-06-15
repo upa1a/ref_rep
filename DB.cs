@@ -17,20 +17,16 @@ namespace @ref
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                if (parameters != null)
                 {
-                    if (parameters != null)
+                    foreach (var param in parameters)
                     {
-                        foreach (var param in parameters)
-                        {
-                            cmd.Parameters.AddWithValue(param.Key, param.Value);
-                        }
-                        using (MySqlDataAdapter adapter = new MySqlDataAdapter(cmd))
-                        {
-                            adapter.Fill(table);
-                        }
+                        cmd.Parameters.AddWithValue(param.Key, param.Value);
                     }
                 }
+                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                adapter.Fill(table);
             }
             return table;
         }

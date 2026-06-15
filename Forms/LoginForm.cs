@@ -23,6 +23,13 @@ namespace @ref.Forms
         {
             string username = tbLogin.Text;
             string password = tbPassword.Text;
+
+            if (username == null || password == null)
+            {
+                MessageBox.Show("Заполнены не все поля", "Предупреждение");
+                return;
+            }
+
             int fails = 0;
 
             DB db = new DB();
@@ -56,15 +63,26 @@ namespace @ref.Forms
                 MessageBox.Show("Вы заблокированы. Обратитесь к администратору", "Предупреждение");
                 return;
             }
-            CaptchaForm captchaForm = new CaptchaForm(userId);
-            captchaForm.ShowDialog();
-            if (captchaForm.ShowDialog() == DialogResult.No)
+            string role = user.Rows[0][3].ToString();
+            if (role == "user")
             {
-                MessageBox.Show("Вы заблокированы. Обратитесь к администратору", "Предупреждение");
-                return;
+                CaptchaForm captchaForm = new CaptchaForm(userId);
+                //captchaForm.ShowDialog();
+                if (captchaForm.ShowDialog() == DialogResult.No)
+                {
+                    MessageBox.Show("Вы заблокированы. Обратитесь к администратору", "Предупреждение");
+                    return;
+                }
+
+                MainForm mainForm = new MainForm();
+                mainForm.ShowDialog();
             }
-
-
+            else if (role == "admin")
+            {
+                AdminForm adminForm = new AdminForm();
+                adminForm.ShowDialog();
+            }
+            Hide();
         }
     }
 }
