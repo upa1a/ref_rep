@@ -1,0 +1,1 @@
+SELECT * FROM milk_factory.users;
