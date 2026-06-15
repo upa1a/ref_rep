@@ -73,16 +73,17 @@ namespace @ref.Forms
                     MessageBox.Show("Вы заблокированы. Обратитесь к администратору", "Предупреждение");
                     return;
                 }
-
+                Hide();
                 MainForm mainForm = new MainForm();
                 mainForm.ShowDialog();
             }
             else if (role == "admin")
             {
+                Hide();
                 AdminForm adminForm = new AdminForm();
                 adminForm.ShowDialog();
             }
-            Hide();
+            Show();
         }
     }
 }
