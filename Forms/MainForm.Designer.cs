@@ -35,6 +35,7 @@
             this.btnClient = new System.Windows.Forms.Button();
             this.btnOrder = new System.Windows.Forms.Button();
             this.dgvInfo = new System.Windows.Forms.DataGridView();
+            this.btnAPI = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvInfo)).BeginInit();
@@ -57,6 +58,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btnAPI);
             this.panel1.Controls.Add(this.btnProduct);
             this.panel1.Controls.Add(this.btnMaterials);
             this.panel1.Controls.Add(this.btnClient);
@@ -71,7 +73,7 @@
             // 
             this.btnProduct.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnProduct.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnProduct.Location = new System.Drawing.Point(17, 361);
+            this.btnProduct.Location = new System.Drawing.Point(17, 285);
             this.btnProduct.Name = "btnProduct";
             this.btnProduct.Size = new System.Drawing.Size(111, 43);
             this.btnProduct.TabIndex = 3;
@@ -83,7 +85,7 @@
             // 
             this.btnMaterials.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnMaterials.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnMaterials.Location = new System.Drawing.Point(17, 252);
+            this.btnMaterials.Location = new System.Drawing.Point(17, 200);
             this.btnMaterials.Name = "btnMaterials";
             this.btnMaterials.Size = new System.Drawing.Size(111, 43);
             this.btnMaterials.TabIndex = 2;
@@ -95,7 +97,7 @@
             // 
             this.btnClient.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClient.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnClient.Location = new System.Drawing.Point(17, 143);
+            this.btnClient.Location = new System.Drawing.Point(17, 112);
             this.btnClient.Name = "btnClient";
             this.btnClient.Size = new System.Drawing.Size(111, 43);
             this.btnClient.TabIndex = 1;
@@ -117,12 +119,28 @@
             // 
             // dgvInfo
             // 
+            this.dgvInfo.AllowUserToAddRows = false;
+            this.dgvInfo.AllowUserToDeleteRows = false;
+            this.dgvInfo.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvInfo.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvInfo.Location = new System.Drawing.Point(3, 3);
             this.dgvInfo.Name = "dgvInfo";
+            this.dgvInfo.ReadOnly = true;
             this.dgvInfo.Size = new System.Drawing.Size(644, 444);
             this.dgvInfo.TabIndex = 1;
+            // 
+            // btnAPI
+            // 
+            this.btnAPI.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAPI.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnAPI.Location = new System.Drawing.Point(15, 358);
+            this.btnAPI.Name = "btnAPI";
+            this.btnAPI.Size = new System.Drawing.Size(118, 61);
+            this.btnAPI.TabIndex = 4;
+            this.btnAPI.Text = "Валидация данных";
+            this.btnAPI.UseVisualStyleBackColor = true;
+            this.btnAPI.Click += new System.EventHandler(this.btnAPI_Click);
             // 
             // MainForm
             // 
@@ -132,7 +150,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.MinimumSize = new System.Drawing.Size(816, 489);
             this.Name = "MainForm";
-            this.Text = "MainForm";
+            this.Text = "Главная";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvInfo)).EndInit();
@@ -149,5 +167,6 @@
     private System.Windows.Forms.Button btnOrder;
     private System.Windows.Forms.DataGridView dgvInfo;
     private System.Windows.Forms.Button btnProduct;
-}
+        private System.Windows.Forms.Button btnAPI;
+    }
 }

@@ -48,5 +48,12 @@ namespace @ref.Forms
             currentTable = "products";
             LoadFromDB();
         }
+
+        private void btnAPI_Click(object sender, EventArgs e)
+        {
+            Hide();
+            APIForm apiForm = new APIForm();
+            apiForm.ShowDialog();
+        }
     }
 }
