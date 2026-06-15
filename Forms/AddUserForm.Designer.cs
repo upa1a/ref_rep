@@ -33,9 +33,9 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.btnAdd = new System.Windows.Forms.Button();
-            this.tbRole = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.cbRole = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // tbPassword
@@ -86,14 +86,6 @@
             this.btnAdd.UseVisualStyleBackColor = false;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
-            // tbRole
-            // 
-            this.tbRole.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.tbRole.Location = new System.Drawing.Point(189, 180);
-            this.tbRole.Name = "tbRole";
-            this.tbRole.Size = new System.Drawing.Size(200, 29);
-            this.tbRole.TabIndex = 13;
-            // 
             // label3
             // 
             this.label3.AutoSize = true;
@@ -115,13 +107,26 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
+            // cbRole
+            // 
+            this.cbRole.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbRole.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.cbRole.FormattingEnabled = true;
+            this.cbRole.Items.AddRange(new object[] {
+            "user",
+            "admin"});
+            this.cbRole.Location = new System.Drawing.Point(189, 180);
+            this.cbRole.Name = "cbRole";
+            this.cbRole.Size = new System.Drawing.Size(200, 32);
+            this.cbRole.TabIndex = 15;
+            // 
             // AddUserForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(468, 291);
+            this.Controls.Add(this.cbRole);
             this.Controls.Add(this.btnCancel);
-            this.Controls.Add(this.tbRole);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.btnAdd);
             this.Controls.Add(this.tbPassword);
@@ -143,8 +148,8 @@
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.Button btnAdd;
-    private System.Windows.Forms.TextBox tbRole;
     private System.Windows.Forms.Label label3;
     private System.Windows.Forms.Button btnCancel;
-}
+        private System.Windows.Forms.ComboBox cbRole;
+    }
 }

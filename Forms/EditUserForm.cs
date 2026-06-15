@@ -53,7 +53,7 @@ namespace @ref.Forms
                 return;
             }
             DB db = new DB();
-            string query = "UPDATE users SET (username = @username, password = @password, role = @role) WHERE idusers = @currentUserId";
+            string query = "UPDATE users SET username = @username, password = @password, role = @role WHERE idusers = @currentUserId";
             var parameters = new Dictionary<string, object>
             {
                 { "@currentUserId", currentUserId },
@@ -62,6 +62,8 @@ namespace @ref.Forms
                 { "@role", role }
             };
             db.Execute(query, parameters);
+            MessageBox.Show("Данные успешно изменены");
+            Close();
         }
 
         private void btnChangeBlocked_Click(object sender, EventArgs e)
@@ -74,6 +76,15 @@ namespace @ref.Forms
             DB db = new DB();
             db.Execute(updQuery, updParameters);
             lblBlockedStatus.Text = "Нет";
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show("Вы уверены, что хотите выйти?", "Предупреждение", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes)
+            {
+                Close();
+            }
         }
     }
 }

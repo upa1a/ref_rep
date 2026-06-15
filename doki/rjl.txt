@@ -1,0 +1,644 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace @ref.Forms
+{
+    public partial class AddUserForm : Form
+    {
+        public AddUserForm()
+        {
+            InitializeComponent();
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            string username = tbLogin.Text;
+            string password = tbPassword.Text;
+            string role = cbRole.Text;
+
+            if (username == null || password == null || role == null)
+            {
+                MessageBox.Show("Заполнены не все поля", "Предупреждение");
+                return;
+            }
+
+            DB db = new DB();
+            try
+            {
+                string query = "INSERT INTO users VALUES (null, @username, @password, @role, 0)";
+                var parameters = new Dictionary<string, object>
+                {
+                    { "@username", username },
+                    { "@password", password },
+                    { "@role", role }
+                };
+                db.Execute(query, parameters);
+                MessageBox.Show("Пользователь успешно добавлен");
+                Close();
+            }
+            catch
+            {
+                MessageBox.Show("Пользователь с таким логином уже существует", "Предупреждение");
+            }
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show("Вы уверены, что хотите выйти?", "Предупреждение", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes)
+            {
+                Close();
+            }
+        }
+    }
+}
+
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace @ref.Forms
+{
+    public partial class AdminForm : Form
+    {
+        public AdminForm()
+        {
+            InitializeComponent();
+            LoadData();
+        }
+        public void LoadData()
+        {
+            DB db = new DB();
+            string query = "SELECT * FROM users";
+            DataTable users = db.Select(query);
+            dgvInfo.DataSource = users;
+        }
+
+        private void btnAddUser_Click(object sender, EventArgs e)
+        {
+            AddUserForm addUserForm = new AddUserForm();
+            addUserForm.ShowDialog();
+            LoadData();
+        }
+
+        private void btnEditUser_Click(object sender, EventArgs e)
+        {
+            int userId = Convert.ToInt32(dgvInfo.CurrentRow.Cells[0].Value);
+            EditUserForm editUserForm = new EditUserForm(userId);
+            editUserForm.ShowDialog();
+            LoadData();
+        }
+
+        private void btnDeleteUser_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show("Вы уверены, что хотите удалить пользователя? Это действие невозможно отменить", "Предупреждение", MessageBoxButtons.YesNo);
+            if (result == DialogResult.No)
+            {
+                return;
+            }
+            int idusers = Convert.ToInt32(dgvInfo.CurrentRow.Cells[0].Value);
+            string query = "DELETE FROM users WHERE idusers = @idusers";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@idusers", idusers }
+            };
+            DB db = new DB();
+            db.Execute(query, parameters);
+            LoadData();
+        }
+    }
+}
+
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Net.Http.Json;
+
+namespace @ref.Forms
+{
+    public partial class APIForm : Form
+    {
+        private HttpClient _httpClient;
+        public APIForm()
+        {
+            InitializeComponent();
+        }
+        //При загрузке формы (2 нажатия по самой форме) происходит подключение к API
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            _httpClient = new HttpClient()
+            {
+                BaseAddress = new Uri("http://localhost:4444/TransferSimulator/fullName")
+            };
+        }
+
+        //Кнопка получения ФИО
+        private async void Button1_Click(object sender, EventArgs e)
+        {
+            var responce = await _httpClient.GetAsync("fullName");
+            var result = await responce.Content.ReadFromJsonAsync<Message>();
+
+            lblData.Text = result.value;
+        }
+
+        //Кнопка валидации ФИО
+        private void Button2_Click(object sender, EventArgs e)
+        {
+            string value = lblData.Text;
+
+            if (Regex.IsMatch(value, @"[^а-яА-я \-]"))
+            {
+                lblResult.Text = "ФИО содержит запрещенные символы";
+            }
+            else
+                lblResult.Text = "ФИО не содержит запрещенные символы";
+        }
+    }
+    // класс - обертка для получения ФИО 
+    class Message { public string value { get; set; } }
+}
+
+using @ref;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace @ref.Forms
+{
+    public partial class CaptchaForm : Form
+    {
+        PictureBox[] slots;
+        PictureBox firstPicture = null;
+        int fails = 0;
+        int currentUserId;
+
+        public CaptchaForm(int userId)
+        {
+            InitializeComponent();
+
+            currentUserId = userId;
+
+            slots = new PictureBox[]
+            {
+                pb1,
+                pb2,
+                pb3,
+                pb4
+            };
+
+            this.Load += CaptchaForm_Load;
+
+            foreach (PictureBox pb in slots)
+            {
+                pb.Click += Slot_Click;
+            }
+        }
+
+        private void CaptchaForm_Load(object sender, EventArgs e)
+        {
+            // Запоминаем правильный порядок
+            for (int i = 0; i < slots.Length; i++)
+            {
+                slots[i].Tag = i;
+            }
+
+            Shuffle();
+        }
+
+        private void Shuffle()
+        {
+            Random random = new Random();
+
+            for (int i = 0; i < slots.Length; i++)
+            {
+                int j = random.Next(0, slots.Length);
+
+                Image tempImage = slots[i].Image;
+                object tempTag = slots[i].Tag;
+
+                slots[i].Image = slots[j].Image;
+                slots[i].Tag = slots[j].Tag;
+
+                slots[j].Image = tempImage;
+                slots[j].Tag = tempTag;
+            }
+        }
+
+        private void Slot_Click(object sender, EventArgs e)
+        {
+            PictureBox current = (PictureBox)sender;
+
+            // Первая картинка
+            if (firstPicture == null)
+            {
+                firstPicture = current;
+                current.BorderStyle = BorderStyle.Fixed3D;
+                return;
+            }
+
+            // Вторая картинка
+            if (current != firstPicture)
+            {
+                Image tempImage = firstPicture.Image;
+                object tempTag = firstPicture.Tag;
+
+                firstPicture.Image = current.Image;
+                firstPicture.Tag = current.Tag;
+
+                current.Image = tempImage;
+                current.Tag = tempTag;
+            }
+
+            firstPicture.BorderStyle = BorderStyle.None;
+            firstPicture = null;
+        }
+
+        private void btnCaptchaCheck_Click(object sender, EventArgs e)
+        {
+            bool success = true;
+
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if ((int)slots[i].Tag != i)
+                {
+                    success = false;
+                }
+            }
+
+            if (success == true)
+            {
+                MessageBox.Show("Капча пройдена");
+
+                DialogResult = DialogResult.OK;
+
+                Close();
+
+                return;
+            }
+
+            fails++;
+
+            if (fails == 3)
+            {
+                DB db = new DB();
+
+                string query = "UPDATE users SET is_blocked = 1 WHERE idusers = @id";
+
+                var parameters = new Dictionary<string, object>()
+                {
+                    { "@id", currentUserId }
+                };
+
+                db.Execute(query, parameters);
+
+                //MessageBox.Show("Вы заблокированы");
+
+                DialogResult = DialogResult.No;
+
+                Close();
+            }
+            else
+            {
+                MessageBox.Show("Неверно. Осталось попыток: " + (3 - fails));
+            }
+        }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace @ref.Forms
+{
+    public partial class EditUserForm : Form
+    {
+        public int currentUserId;
+        public EditUserForm(int userId)
+        {
+            InitializeComponent();
+            currentUserId = userId;
+            LoadData();
+        }
+        public void LoadData()
+        {
+            DB db = new DB();
+            string selQuery = "SELECT * FROM users WHERE idusers = @currentUserId";
+            var selParameters = new Dictionary<string, object>
+            {
+                { "@currentUserId", currentUserId }
+            };
+            DataTable user = db.Select(selQuery, selParameters);
+            tbLogin.Text = user.Rows[0][1].ToString();
+            tbPassword.Text = user.Rows[0][2].ToString();
+            tbRole.Text = user.Rows[0][3].ToString();
+            if (Convert.ToInt32(user.Rows[0][4]) == 0)
+            {
+                lblBlockedStatus.Text = "Нет";
+            }
+            else
+            {
+                lblBlockedStatus.Text = "Да";
+            }
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            string username = tbLogin.Text;
+            string password = tbPassword.Text;
+            string role = tbRole.Text;
+
+            if (username == null || password == null || role == null)
+            {
+                MessageBox.Show("Заполнены не все поля", "Предупреждение");
+                return;
+            }
+            DB db = new DB();
+            string query = "UPDATE users SET username = @username, password = @password, role = @role WHERE idusers = @currentUserId";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@currentUserId", currentUserId },
+                { "@username", username },
+                { "@password", password },
+                { "@role", role }
+            };
+            db.Execute(query, parameters);
+            MessageBox.Show("Данные успешно изменены");
+            Close();
+        }
+
+        private void btnChangeBlocked_Click(object sender, EventArgs e)
+        {
+            string updQuery = "UPDATE users SET is_blocked = 0 WHERE idusers = @currentUserId";
+            var updParameters = new Dictionary<string, object>
+            {
+                { "@currentUserId", currentUserId }
+            };
+            DB db = new DB();
+            db.Execute(updQuery, updParameters);
+            lblBlockedStatus.Text = "Нет";
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show("Вы уверены, что хотите выйти?", "Предупреждение", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes)
+            {
+                Close();
+            }
+        }
+    }
+}
+
+
+using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.Common;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace @ref.Forms
+{
+    public partial class LoginForm : Form
+    {
+        public LoginForm()
+        {
+            InitializeComponent();
+        }
+
+        private void btnLogin_Click(object sender, EventArgs e)
+        {
+            string username = tbLogin.Text;
+            string password = tbPassword.Text;
+
+            if (username == null || password == null)
+            {
+                MessageBox.Show("Заполнены не все поля", "Предупреждение");
+                return;
+            }
+
+            int fails = 0;
+
+            DB db = new DB();
+            string query = @"SELECT * FROM users WHERE username = @username AND password = @password";
+            var parameters = new Dictionary<string, object>
+            {
+                { "@username", username},
+                { "@password", password }
+            };
+            DataTable user = db.Select(query, parameters);
+            if (user.Rows.Count == 0)
+            {
+                fails++;
+                MessageBox.Show("Вы ввели неверный логин или пароль. Пожалуйста проверьте ещё раз введенные данные", "Предупреждение");
+                return;
+            }
+            int userId = Convert.ToInt32(user.Rows[0][0]);
+            if (fails == 3)
+            {
+                string queryUpd = "UPDATE users SET is_blocked = 1 WHERE idusers = @userId";
+                var parametersUpd = new Dictionary<string, object>
+                {
+                    { "@userId", userId }
+                };
+                db.Execute(queryUpd, parametersUpd);
+                MessageBox.Show("Вы заблокированы. Обратитесь к администратору", "Предупреждение");
+                return;
+            }
+            if (Convert.ToInt32(user.Rows[0][4]) == 1)
+            {
+                MessageBox.Show("Вы заблокированы. Обратитесь к администратору", "Предупреждение");
+                return;
+            }
+            string role = user.Rows[0][3].ToString();
+            if (role == "user")
+            {
+                CaptchaForm captchaForm = new CaptchaForm(userId);
+                //captchaForm.ShowDialog();
+                if (captchaForm.ShowDialog() == DialogResult.No)
+                {
+                    MessageBox.Show("Вы заблокированы. Обратитесь к администратору", "Предупреждение");
+                    return;
+                }
+                Hide();
+                MainForm mainForm = new MainForm();
+                mainForm.ShowDialog();
+            }
+            else if (role == "admin")
+            {
+                Hide();
+                AdminForm adminForm = new AdminForm();
+                adminForm.ShowDialog();
+            }
+            Show();
+        }
+    }
+}
+
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace @ref.Forms
+{
+    public partial class MainForm : Form
+    {
+        public string currentTable;
+        public MainForm()
+        {
+            InitializeComponent();
+        }
+        public void LoadFromDB()
+        {
+            DB db = new DB();
+            string query = $"SELECT * FROM {currentTable}";
+            DataTable table = db.Select(query);
+            dgvInfo.DataSource = table;
+        }
+
+        private void btnClient_Click(object sender, EventArgs e)
+        {
+            currentTable = "clients";
+            LoadFromDB();
+        }
+
+        private void btnOrder_Click(object sender, EventArgs e)
+        {
+            currentTable = "orders";
+            LoadFromDB();
+        }
+
+        private void btnMaterials_Click(object sender, EventArgs e)
+        {
+            currentTable = "materials";
+            LoadFromDB();
+        }
+
+        private void btnProduct_Click(object sender, EventArgs e)
+        {
+            currentTable = "products";
+            LoadFromDB();
+        }
+
+        private void btnAPI_Click(object sender, EventArgs e)
+        {
+            Hide();
+            APIForm apiForm = new APIForm();
+            apiForm.ShowDialog();
+        }
+    }
+}
+
+
+using MySql.Data.MySqlClient;
+using Mysqlx.Crud;
+using MySqlX.XDevAPI;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Windows.Forms;
+
+namespace @ref
+{
+    public class DB
+    {
+        public readonly string connectionString = "server=localhost;uid=root;pwd=root;database=milk_factory";
+        public DataTable Select(string query, Dictionary<string, object> parameters = null)
+        {
+            DataTable table = new DataTable();
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                if (parameters != null)
+                {
+                    foreach (var param in parameters)
+                    {
+                        cmd.Parameters.AddWithValue(param.Key, param.Value);
+                    }
+                }
+                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                adapter.Fill(table);
+            }
+            return table;
+        }
+        public int Execute(string query, Dictionary<string, object> parameters = null)
+        {
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    if (parameters != null)
+                    {
+                        foreach (var param in parameters)
+                        {
+                            cmd.Parameters.AddWithValue(param.Key, param.Value);
+                        }
+                    }
+                    return cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+
+        //SELECT DISTINCT clients.name AS 'Поставщики', COUNT(distinct products.productsname) 'Общее количество', 
+        //SUM(products.price* orders_has_products.count) AS 'Итого' FROM milk_factory.orders
+        //JOIN orders_has_products ON orders_has_products.orders_idorders = orders.idorders
+        //JOIN products ON products.idproducts = orders_has_products.products_idproducts
+        //JOIN clients ON clients.id = milk_factory.orders.clients_id
+        //GROUP BY clients.name;
+
+//SELECT distinct clients.name AS 'Покупатели', SUM(specifications.materials_quantity* materials.price* orders_has_products.count) AS 'Итого' FROM orders
+//JOIN clients ON clients.id = orders.clients_id
+//JOIN orders_has_products ON orders_has_products.orders_idorders = orders.idorders
+//JOIN specifications ON specifications.products_idproducts = orders_has_products.products_idproducts
+//JOIN materials ON materials.idmaterials = specifications.materials_idmaterials
+//GROUP BY clients.name
+    }
+}
+
+

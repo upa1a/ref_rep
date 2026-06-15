@@ -21,7 +21,7 @@ namespace @ref.Forms
         {
             string username = tbLogin.Text;
             string password = tbPassword.Text;
-            string role = tbRole.Text;
+            string role = cbRole.Text;
 
             if (username == null || password == null || role == null)
             {
