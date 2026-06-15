@@ -14,6 +14,7 @@ namespace @ref.Forms
 {
     public partial class LoginForm : Form
     {
+        public int fails = 0;
         public LoginForm()
         {
             InitializeComponent();
@@ -24,13 +25,11 @@ namespace @ref.Forms
             string username = tbLogin.Text;
             string password = tbPassword.Text;
 
-            if (username == null || password == null)
+            if (username == "" || password == "")
             {
                 MessageBox.Show("Заполнены не все поля", "Предупреждение");
                 return;
             }
-
-            int fails = 0;
 
             DB db = new DB();
             string query = @"SELECT * FROM users WHERE username = @username AND password = @password";

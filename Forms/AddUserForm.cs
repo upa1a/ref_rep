@@ -23,7 +23,7 @@ namespace @ref.Forms
             string password = tbPassword.Text;
             string role = cbRole.Text;
 
-            if (username == null || password == null || role == null)
+            if (username == "" || password == "" || role == "")
             {
                 MessageBox.Show("Заполнены не все поля", "Предупреждение");
                 return;
